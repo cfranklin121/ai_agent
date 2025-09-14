@@ -5,7 +5,7 @@ from google import genai
 from google.genai import types
 from prompts import system_prompt
 
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 def main():
     load_dotenv()
@@ -38,6 +38,9 @@ def main():
 
     if response.function_calls:
         function_call_part = response.function_calls[0] 
+
+    call_function(function_call_part, verbose=verbose_flag)
+    '''
     if verbose_flag:
         print(f"User prompt: {user_prompt}")
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
@@ -48,6 +51,7 @@ def main():
             print(f"Calling function: {function_call_part.name}({function_call_part.args})")
     else:
         print(response.text)
+    '''
 
 if __name__ == "__main__":
     main()
