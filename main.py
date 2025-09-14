@@ -36,22 +36,26 @@ def main():
             tools=[available_functions], system_instruction=system_prompt),
     )
 
-    if response.function_calls:
-        function_call_part = response.function_calls[0] 
-
-    call_function(function_call_part, verbose=verbose_flag)
-    '''
     if verbose_flag:
-        print(f"User prompt: {user_prompt}")
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-       
-    if response.function_calls:
-        for function_call_part in response.function_calls:
-            print(f"Calling function: {function_call_part.name}({function_call_part.args})")
-    else:
-        print(response.text)
-    '''
+    if not response.function_calls:
+        return response.text 
+
+    function_responses = []
+    for function_call_part in response.function_calls:
+        function_call_result = call_function(function_call_part, verbose_flag)
+        if (
+            not function_call_result.parts
+            or not function_call_result.parts[0].function_response
+        ):
+            raise Exception("empty function call result")
+        if verbose_flag:
+            print(f"-> {function_call_result.parts[0].function_response.response}")
+        function_responses.append(function_call_result.parts[0])
+
+    if not function_responses:
+        raise Exception("no function responses generated, exiting.")
 
 if __name__ == "__main__":
     main()
